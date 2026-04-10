@@ -130,7 +130,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nYou cannot shit anymore this is rainbow engine! Github repo soon though\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: " + e.error + "\nIt looks like Rainbow Engine has crashed... please report it at https://github.com/CubicCreeper/FNF-RainbowEngine/issues\n\n> Crash Handler written by: sqirra-rng";
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
