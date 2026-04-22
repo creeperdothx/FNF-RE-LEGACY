@@ -337,7 +337,7 @@ class Note extends FlxSprite
 
 		if (isSustainNote)
 		{
-			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			animation.addByPrefix('purpleholdend', 'pruple end hold'); // why the fuck is this a required thing
 			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
 			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
 		}

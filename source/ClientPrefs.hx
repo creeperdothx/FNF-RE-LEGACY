@@ -14,6 +14,8 @@ class ClientPrefs {
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
+	public static var moreScoreInfo:Bool = false;
+	public static var watermark:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 60;
@@ -98,6 +100,8 @@ class ClientPrefs {
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
 		FlxG.save.data.showFPS = showFPS;
+		FlxG.save.data.moreScoreInfo = moreScoreInfo;
+		FlxG.save.data.watermark = watermark;
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
@@ -149,6 +153,12 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.opponentStrums != null) {
 			opponentStrums = FlxG.save.data.opponentStrums;
+		}
+		if(FlxG.save.data.moreScoreInfo != null) {
+			moreScoreInfo = FlxG.save.data.moreScoreInfo;
+		}
+		if(FlxG.save.data.watermark != null) {
+			watermark = FlxG.save.data.watermark;
 		}
 		if(FlxG.save.data.showFPS != null) {
 			showFPS = FlxG.save.data.showFPS;

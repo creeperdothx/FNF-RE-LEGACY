@@ -64,6 +64,7 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+	var platSpr:FlxSprite;
 	
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
 	var titleTextAlphas:Array<Float> = [1, .64];
@@ -129,19 +130,19 @@ class TitleState extends MusicBeatState
 		swagShader = new ColorSwap();
 		super.create();
 
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('save');
 
 		ClientPrefs.loadPrefs();
 
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.checkForUpdates && !closedState) {
 			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/ShadowMario/FNF-PsychEngine/main/gitVersion.txt");
+			var http = new haxe.Http("https://raw.githubusercontent.com/creeperdothx/FNF-RE-Legacy/main/gitVersion.txt");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.psychEngineVersion.trim();
+				var curVersion:String = MainMenuState.rainbowEngineVersion.trim();
 				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
 					trace('versions arent matching!');
@@ -399,13 +400,21 @@ class TitleState extends MusicBeatState
 
 		credTextShit.visible = false;
 
-		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
+		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgroundsLOGO'));
 		add(ngSpr);
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
 		ngSpr.updateHitbox();
 		ngSpr.screenCenter(X);
 		ngSpr.antialiasing = ClientPrefs.globalAntialiasing;
+		
+		platSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('platformLOGO'));
+		add(platSpr);
+		platSpr.visible = false;
+		platSpr.setGraphicSize(Std.int(platSpr.width * 0.8));
+		platSpr.updateHitbox();
+		platSpr.screenCenter(X);
+		platSpr.antialiasing = ClientPrefs.globalAntialiasing;
 
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
@@ -649,7 +658,7 @@ class TitleState extends MusicBeatState
 				case 4:
 					#if PSYCH_WATERMARKS
 					addMoreText('by', 15);
-					addMoreText('CubicCreeper', 15);
+					addMoreText('creeper.hx', 15);
 					#else
 					addMoreText('present');
 					#end
@@ -662,17 +671,26 @@ class TitleState extends MusicBeatState
 				// credTextShit.screenCenter();
 				case 6:
 					#if PSYCH_WATERMARKS
-					createCoolText(['Not associated', 'with'], -40);
+					createCoolText(['You are currently playing'], -40);
 					#else
 					createCoolText(['In association', 'with'], -40);
 					#end
 				case 8:
-					addMoreText('newgrounds', -40);
+					#if PSYCH_WATERMARKS
+					addMoreText('the LEGACY version', -40);
+					platSpr.visible = true;
+					#else
+					addMoreText('Newgrounds', -40);
 					ngSpr.visible = true;
+					#end
 				// credTextShit.text += '\nNewgrounds';
 				case 9:
 					deleteCoolText();
+					#if PSYCH_WATERMARKS
+					platSpr.visible = false;
+					#else
 					ngSpr.visible = false;
+					#end
 				// credTextShit.visible = false;
 
 				// credTextShit.text = 'Shoutouts Tom Fulp';

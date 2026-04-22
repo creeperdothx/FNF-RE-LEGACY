@@ -100,6 +100,10 @@ class ChartingState extends MusicBeatState
 	var _file:FileReference;
 
 	var UI_box:FlxUITabMenu;
+	var save1Val:FlxText;
+	var save2Val:FlxText;
+	var preset1:FlxUIDropDownMenuCustom;
+	var preset2:FlxUIDropDownMenuCustom;
 
 	public static var goToPlayState:Bool = false;
 	/**
@@ -109,6 +113,8 @@ class ChartingState extends MusicBeatState
 	public static var curSec:Int = 0;
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
+	
+	var event7InputText:FlxUIInputText;
 
 	var bpmTxt:FlxText;
 
@@ -123,7 +129,7 @@ class ChartingState extends MusicBeatState
 	var highlight:FlxSprite;
 
 	public static var GRID_SIZE:Int = 40;
-	var CAM_OFFSET:Int = 360;
+	var CAM_OFFSET:Int = 180;
 
 	var dummyArrow:FlxSprite;
 
@@ -211,6 +217,25 @@ class ChartingState extends MusicBeatState
 			_song = PlayState.SONG;
 		else
 		{
+			if(FlxG.save.data.preset1stuff == null)
+			{
+				trace('found null1');
+				FlxG.save.data.preset1stuff = ["", ""];
+			}
+		if(FlxG.save.data.preset2stuff == null)
+			{
+				trace('found null2');
+				FlxG.save.data.preset2stuff = ["", ""];
+			}
+		if(FlxG.save.data.preset1stuff.length <= 0 || FlxG.save.data.preset1stuff.length == null || FlxG.save.data.preset1stuff == null)
+			{
+				FlxG.save.data.preset1stuff = ["", ""];
+			}
+		if(FlxG.save.data.preset2stuff.length <= 0 || FlxG.save.data.preset2stuff.length == null || FlxG.save.data.preset2stuff == null)
+			{
+				FlxG.save.data.preset2stuff = ["", ""];
+			}
+			
 			CoolUtil.difficulties = CoolUtil.defaultDifficulties.copy();
 			
 			_song = {
@@ -249,7 +274,7 @@ class ChartingState extends MusicBeatState
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.scrollFactor.set();
-		bg.color = 0xFFAAAAAA;
+		bg.color = 0xFF222222;
 		add(bg);
 
 		gridLayer = new FlxTypedGroup<FlxSprite>();
@@ -259,8 +284,8 @@ class ChartingState extends MusicBeatState
 		add(waveformSprite);
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
-		leftIcon = new HealthIcon('bf');
-		rightIcon = new HealthIcon('dad');
+		leftIcon = new HealthIcon('dad');
+		rightIcon = new HealthIcon('bf');
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
@@ -335,6 +360,7 @@ class ChartingState extends MusicBeatState
 		var tabs = [
 			{name: "Song", label: 'Song'},
 			{name: "Section", label: 'Section'},
+			{name: "Metadata", label: 'Metadata'},
 			{name: "Note", label: 'Note'},
 			{name: "Events", label: 'Events'},
 			{name: "Charting", label: 'Charting'},
@@ -343,39 +369,14 @@ class ChartingState extends MusicBeatState
 		UI_box = new FlxUITabMenu(null, tabs, true);
 
 		UI_box.resize(300, 400);
-		UI_box.x = 640 + GRID_SIZE / 2;
-		UI_box.y = 25;
+		UI_box.x = 15 + GRID_SIZE / 2;
+		UI_box.y = 125;
 		UI_box.scrollFactor.set();
-
-		text =
-		"W/S or Mouse Wheel - Change Conductor's strum time
-		\nA/D - Go to the previous/next section
-		\nLeft/Right - Change Snap
-		\nUp/Down - Change Conductor's Strum Time with Snapping
-		\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
-		\nALT + Left Bracket / Right Bracket - Reset Song Playback Rate
-		\nHold Shift to move 4x faster
-		\nHold Control and click on an arrow to select it
-		\nZ/X - Zoom in/out
-		\n
-		\nEsc - Test your chart inside Chart Editor
-		\nEnter - Play your chart
-		\nQ/E - Decrease/Increase Note Sustain Length
-		\nSpace - Stop/Resume song";
-
-		var tipTextArray:Array<String> = text.split('\n');
-		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
-			tipText.y += i * 12;
-			tipText.setFormat(Paths.font("comic.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
-			//tipText.borderSize = 2;
-			tipText.scrollFactor.set();
-			add(tipText);
-		}
 		add(UI_box);
 
 		addSongUI();
 		addSectionUI();
+		addMetadataUI();
 		addNoteUI();
 		addEventsUI();
 		addChartingUI();
@@ -428,28 +429,20 @@ class ChartingState extends MusicBeatState
 			_song.needsVoices = check_voices.checked;
 			//trace('CHECKED!');
 		};
-		
-		var disableGhostTapping = new FlxUICheckBox(10, 45, null, null, "No Ghost Tap", 100);
-		disableGhostTapping.checked = _song.disableGhostTapping;
-		disableGhostTapping.callback = function()
-		{
-			_song.disableGhostTapping = disableGhostTapping.checked;
-			trace('no more ghost tapping!');
-		};
 
-		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
+		var saveButton:FlxButton = new FlxButton(200, 8, "Save", function()
 		{
 			saveLevel();
 		});
 
-		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
+		var reloadSong:FlxButton = new FlxButton(saveButton.x, saveButton.y + 30, "Reload Audio", function()
 		{
 			currentSongName = Paths.formatToSongPath(UI_songTitle.text);
 			loadSong();
 			updateWaveform();
 		});
 
-		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
+		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, reloadSong.y + 30, "Reload JSON", function()
 		{
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(_song.song.toLowerCase()); }, null,ignoreWarnings));
 		});
@@ -478,7 +471,7 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function ()
+		var saveEvents:FlxButton = new FlxButton(loadEventJson.x, loadEventJson.y + 30, 'Save Events', function ()
 		{
 			saveEvents();
 		});
@@ -511,119 +504,12 @@ class ChartingState extends MusicBeatState
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
-		#if MODS_ALLOWED
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/characters/'));
-		#else
-		var directories:Array<String> = [Paths.getPreloadPath('characters/')];
-		#end
-
-		var tempMap:Map<String, Bool> = new Map<String, Bool>();
-		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		for (i in 0...characters.length) {
-			tempMap.set(characters[i], true);
-		}
-
-		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charToCheck.endsWith('-dead') && !tempMap.exists(charToCheck)) {
-							tempMap.set(charToCheck, true);
-							characters.push(charToCheck);
-						}
-					}
-				}
-			}
-		}
-		#end
-
-		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.player1 = characters[Std.parseInt(character)];
-			updateHeads();
-		});
-		player1DropDown.selectedLabel = _song.player1;
-		blockPressWhileScrolling.push(player1DropDown);
-
-		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.gfVersion = characters[Std.parseInt(character)];
-			updateHeads();
-		});
-		gfVersionDropDown.selectedLabel = _song.gfVersion;
-		blockPressWhileScrolling.push(gfVersionDropDown);
-
-		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.player2 = characters[Std.parseInt(character)];
-			updateHeads();
-		});
-		player2DropDown.selectedLabel = _song.player2;
-		blockPressWhileScrolling.push(player2DropDown);
-
-		#if MODS_ALLOWED
-		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/stages/'));
-		#else
-		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
-		#end
-
-		tempMap.clear();
-		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-		var stages:Array<String> = [];
-		for (i in 0...stageFile.length) { //Prevent duplicates
-			var stageToCheck:String = stageFile[i];
-			if(!tempMap.exists(stageToCheck)) {
-				stages.push(stageToCheck);
-			}
-			tempMap.set(stageToCheck, true);
-		}
-		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var stageToCheck:String = file.substr(0, file.length - 5);
-						if(!tempMap.exists(stageToCheck)) {
-							tempMap.set(stageToCheck, true);
-							stages.push(stageToCheck);
-						}
-					}
-				}
-			}
-		}
-		#end
-
-		if(stages.length < 1) stages.push('stage');
-
-		stageDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String)
-		{
-			_song.stage = stages[Std.parseInt(character)];
-		});
-		stageDropDown.selectedLabel = _song.stage;
-		blockPressWhileScrolling.push(stageDropDown);
-		
-		creditInputText = new FlxUIInputText(10, 200 + 90, 125, _song.credit, 8);
-		blockPressWhileTypingOn.push(creditInputText);
-
-		bambiInputText = new FlxUIInputText(creditInputText.x + 140, creditInputText.y, 125, _song.bambiText, 8);
-		blockPressWhileTypingOn.push(bambiInputText);
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
 
 		tab_group_song.add(check_voices);
-		tab_group_song.add(disableGhostTapping);
 		tab_group_song.add(clear_events);
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
@@ -634,20 +520,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(loadEventJson);
 		tab_group_song.add(stepperBPM);
 		tab_group_song.add(stepperSpeed);
-		tab_group_song.add(creditInputText);
-		tab_group_song.add(bambiInputText);
-		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
-		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
-		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
-		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
-		tab_group_song.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Boyfriend:'));
-		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
-		tab_group_song.add(new FlxText(creditInputText.x, creditInputText.y - 15, 0, 'Song Credit:'));
-		tab_group_song.add(new FlxText(bambiInputText.x, bambiInputText.y - 15, 0, 'Bambi Text:'));
-		tab_group_song.add(player2DropDown);
-		tab_group_song.add(gfVersionDropDown);
-		tab_group_song.add(player1DropDown);
-		tab_group_song.add(stageDropDown);
 
 		UI_box.addGroup(tab_group_song);
 
@@ -929,6 +801,144 @@ class ChartingState extends MusicBeatState
 	var noteTypeDropDown:FlxUIDropDownMenuCustom;
 	var currentType:Int = 0;
 
+	function addMetadataUI():Void
+	{
+		var tab_group_metadata = new FlxUI(null, UI_box);
+		tab_group_metadata.name = 'Metadata';
+		
+		var disableGhostTapping = new FlxUICheckBox(10, 200, null, null, "No Ghost Tap", 100);
+		disableGhostTapping.checked = _song.disableGhostTapping;
+		disableGhostTapping.callback = function()
+		{
+			_song.disableGhostTapping = disableGhostTapping.checked;
+			trace('no more ghost tapping!');
+		};
+		
+		#if MODS_ALLOWED
+		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+		for(mod in Paths.getGlobalMods())
+			directories.push(Paths.mods(mod + '/characters/'));
+		#else
+		var directories:Array<String> = [Paths.getPreloadPath('characters/')];
+		#end
+
+		var tempMap:Map<String, Bool> = new Map<String, Bool>();
+		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		for (i in 0...characters.length) {
+			tempMap.set(characters[i], true);
+		}
+
+		#if MODS_ALLOWED
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if(!charToCheck.endsWith('-dead') && !tempMap.exists(charToCheck)) {
+							tempMap.set(charToCheck, true);
+							characters.push(charToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+
+		var player1DropDown = new FlxUIDropDownMenuCustom(10, 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.player1 = characters[Std.parseInt(character)];
+			updateHeads();
+		});
+		player1DropDown.selectedLabel = _song.player1;
+		blockPressWhileScrolling.push(player1DropDown);
+		
+		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.player2 = characters[Std.parseInt(character)];
+			updateHeads();
+		});
+		player2DropDown.selectedLabel = _song.player2;
+		blockPressWhileScrolling.push(player2DropDown);
+
+		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player2DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.gfVersion = characters[Std.parseInt(character)];
+			updateHeads();
+		});
+		gfVersionDropDown.selectedLabel = _song.gfVersion;
+		blockPressWhileScrolling.push(gfVersionDropDown);
+
+		#if MODS_ALLOWED
+		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+		for(mod in Paths.getGlobalMods())
+			directories.push(Paths.mods(mod + '/stages/'));
+		#else
+		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
+		#end
+
+		tempMap.clear();
+		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
+		var stages:Array<String> = [];
+		for (i in 0...stageFile.length) { //Prevent duplicates
+			var stageToCheck:String = stageFile[i];
+			if(!tempMap.exists(stageToCheck)) {
+				stages.push(stageToCheck);
+			}
+			tempMap.set(stageToCheck, true);
+		}
+		#if MODS_ALLOWED
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if(!tempMap.exists(stageToCheck)) {
+							tempMap.set(stageToCheck, true);
+							stages.push(stageToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+
+		if(stages.length < 1) stages.push('stage');
+
+		stageDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String)
+		{
+			_song.stage = stages[Std.parseInt(character)];
+		});
+		stageDropDown.selectedLabel = _song.stage;
+		blockPressWhileScrolling.push(stageDropDown);
+		
+		creditInputText = new FlxUIInputText(player2DropDown.x + 140, player2DropDown.y + 1, 120, _song.credit, 10);
+		blockPressWhileTypingOn.push(creditInputText);
+
+		bambiInputText = new FlxUIInputText(gfVersionDropDown.x + 140, gfVersionDropDown.y + 1, 120, _song.bambiText, 10);
+		blockPressWhileTypingOn.push(bambiInputText);
+
+		tab_group_metadata.add(disableGhostTapping);
+		tab_group_metadata.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Player:'));
+		tab_group_metadata.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
+		tab_group_metadata.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Spectator:'));
+		tab_group_metadata.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
+		tab_group_metadata.add(new FlxText(creditInputText.x, creditInputText.y - 15, 0, 'Song Credit:'));
+		tab_group_metadata.add(new FlxText(bambiInputText.x, bambiInputText.y - 15, 0, 'Bambi Text:'));
+		tab_group_metadata.add(creditInputText);
+		tab_group_metadata.add(bambiInputText);
+		tab_group_metadata.add(gfVersionDropDown);
+		tab_group_metadata.add(player2DropDown);
+		tab_group_metadata.add(player1DropDown);
+		tab_group_metadata.add(stageDropDown);
+
+		UI_box.addGroup(tab_group_metadata);
+	}
+	
+	
 	function addNoteUI():Void
 	{
 		var skin = PlayState.SONG.arrowOpponentSkin;
@@ -1381,7 +1391,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(voicesVolume);
 		
 		#if !html5
-		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 120, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 120, 0.25, 4, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		tab_group_chart.add(sliderRate);
 		#end

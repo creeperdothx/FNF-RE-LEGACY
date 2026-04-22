@@ -82,7 +82,7 @@ class CreditsState extends MusicBeatState
 
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['Rainbow Engine Team'],
-			['CubicCreeper',		'cubiccreeper',		'Main Programmer of Rainbow Engine (icon by firey)',							'https://www.youtube.com/@CubicCreeper',	'3BFF3B'],
+			['creeper.hx',		'creeper.hx',		'Main Programmer of Rainbow Engine (icon by firey)',							'https://www.youtube.com/@creeperdothx',	'3BFF3B'],
 			[''],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
@@ -92,7 +92,7 @@ class CreditsState extends MusicBeatState
 			['Former Engine Members'],
 			['bb-panzu',			'bb',				'Ex-Programmer of Psych Engine',								'https://twitter.com/bbsub3',			'3E813A'],
 			[''],
-			['Engine Contributors'],
+			['Psych Engine Contributors'],
 			['iFlicky',				'flicky',			'Composer of Psync and Tea Time\nMade the Dialogue Sounds',		'https://twitter.com/flicky_i',			'9E29CF'],
 			['SqirraRNG',			'sqirra',			'Crash Handler and Base code for\nChart Editor\'s Waveform',	'https://twitter.com/gedehari',			'E1843A'],
 			['EliteMasterEric',		'mastereric',		'Runtime Shaders support',										'https://twitter.com/EliteMasterEric',	'FFBD40'],

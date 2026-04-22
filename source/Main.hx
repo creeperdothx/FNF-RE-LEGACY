@@ -117,7 +117,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "./crash/" + "RainbowEngine_" + dateNow + ".txt";
+		path = "./crash/" + "RE-Legacy_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -130,7 +130,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nIt looks like Rainbow Engine has crashed... please report it at https://github.com/CubicCreeper/FNF-RainbowEngine/issues\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: " + e.error + "\nIt looks like Rainbow Engine Legacy has crashed...\nplease report it at https://github.com/creeperdothx/FNF-RE-Legacy/issues\n\n> Crash Handler written by: sqirra-rng";
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");

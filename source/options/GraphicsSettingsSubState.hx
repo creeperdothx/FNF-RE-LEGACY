@@ -59,6 +59,13 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'bool', //Variable type
 			true); //Default value
 		addOption(option);
+		
+		var option:Option = new Option('Watermark', //Name
+			'If checked, it shows the engine name and version, song name, difficulty, and bambi text', //Description
+			'watermark', //Save data variable name
+			'bool', //Variable type
+			true); //Default value
+		addOption(option);
 
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
@@ -68,7 +75,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			60);
 		addOption(option);
 
-		option.scrollSpeed = 5;
+		option.scrollSpeed = 100;
 		option.minValue = 1;
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;

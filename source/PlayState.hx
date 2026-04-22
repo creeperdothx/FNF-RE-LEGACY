@@ -275,6 +275,7 @@ class PlayState extends MusicBeatState
 	public var songMisses:Int = 0;
 	public var scoreTxt:FlxText;
 	var timeTxt:FlxText;
+	var judgementCounter:FlxText;
 	var scoreTxtTween:FlxTween;
 
 	public static var campaignScore:Int = 0;
@@ -1170,23 +1171,31 @@ class PlayState extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
 		
+		judgementCounter = new FlxText(10, 0, 0, "", 20);
+		judgementCounter.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		judgementCounter.scrollFactor.set();
+		judgementCounter.visible = ClientPrefs.moreScoreInfo && !ClientPrefs.hideHud;
+		judgementCounter.screenCenter(Y);
+		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nMisses: ${songMisses}\n';
+	    add(judgementCounter);
+		
 		if(SONG.credit != null) {
-			watermarkTxt = new FlxText(10, FlxG.height - 28, 0, 'By ' + SONG.credit + ' - ' + SONG.song + " - " + CoolUtil.difficultyString() + " - Rainbow Engine v" + MainMenuState.rainbowEngineVersion, 74);
+			watermarkTxt = new FlxText(10, FlxG.height - 28, 0, 'By ' + SONG.credit + ' - ' + SONG.song + " - " + CoolUtil.difficultyString() + " - RE Legacy V" + MainMenuState.rainbowEngineVersion, 74);
 			watermarkTxt.scrollFactor.set();
 			watermarkTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			watermarkTxt.size = 18;
 			watermarkTxt.updateHitbox();
-			watermarkTxt.visible = !ClientPrefs.hideHud;
+			watermarkTxt.visible =  ClientPrefs.watermark && !ClientPrefs.hideHud;
 			watermarkTxt.alpha = 0.6;
 			add(watermarkTxt);
 			}
 		else {
-			watermarkTxt = new FlxText(10, FlxG.height - 28, 0, SONG.song + " - " + CoolUtil.difficultyString() + " - Rainbow Engine v" + MainMenuState.rainbowEngineVersion, 74);
+			watermarkTxt = new FlxText(10, FlxG.height - 28, 0, SONG.song + " - " + CoolUtil.difficultyString() + " - RE Legacy V" + MainMenuState.rainbowEngineVersion, 74);
 			watermarkTxt.scrollFactor.set();
 			watermarkTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			watermarkTxt.size = 18;
 			watermarkTxt.updateHitbox();
-			watermarkTxt.visible = !ClientPrefs.hideHud;
+			watermarkTxt.visible = ClientPrefs.watermark && !ClientPrefs.hideHud;
 			watermarkTxt.alpha = 0.6;
 			add(watermarkTxt);
 			}
@@ -1197,7 +1206,7 @@ class PlayState extends MusicBeatState
 				bambiTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				bambiTxt.size = 18;
 				bambiTxt.updateHitbox();
-				bambiTxt.visible = !ClientPrefs.hideHud;
+				bambiTxt.visible = ClientPrefs.watermark && !ClientPrefs.hideHud;
 				bambiTxt.alpha = 0.6;
 				add(bambiTxt);
 				watermarkTxt.y = FlxG.height - 50;
@@ -1208,7 +1217,7 @@ class PlayState extends MusicBeatState
 				bambiTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				bambiTxt.size = 18;
 				bambiTxt.updateHitbox();
-				bambiTxt.visible = !ClientPrefs.hideHud;
+				bambiTxt.visible = ClientPrefs.watermark && !ClientPrefs.hideHud;
 				bambiTxt.alpha = 0.6;
 				add(bambiTxt);
 			}
@@ -1231,6 +1240,7 @@ class PlayState extends MusicBeatState
 		iconP1.cameras = [camHUD];
 		iconP2.cameras = [camHUD];
 		scoreTxt.cameras = [camHUD];
+		judgementCounter.cameras = [camHUD];
 		watermarkTxt.cameras = [camHUD];
 		bambiTxt.cameras = [camHUD];
 		botplayTxt.cameras = [camHUD];
@@ -2363,10 +2373,17 @@ class PlayState extends MusicBeatState
 
 	public function updateScore(miss:Bool = false)
 	{
-		scoreTxt.text = 'Score: ' + songScore
-		+ ' | Misses: ' + songMisses
-		+ ' | Rating: ' + ratingName
-		+ (ratingName != '?' ? ' (${Highscore.floorDecimal(ratingPercent * 100, 2)}%) - $ratingFC' : '');
+		if (cpuControlled) {
+			scoreTxt.text = 'Total Notes Hit: ' + (sicks + goods + bads + shits);
+		}
+		else {
+			scoreTxt.text = 'Score: ' + songScore
+			+ ' | Misses: ' + songMisses
+			+ ' | Rating: ' + ratingName
+			+ (ratingName != '?' ? ' (${Highscore.floorDecimal(ratingPercent * 100, 2)}%) - $ratingFC' : '');
+		}
+		
+		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nMisses: ${songMisses}\n';
 
 		if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
 		{
@@ -4241,6 +4258,17 @@ class PlayState extends MusicBeatState
 
 		if(!practiceMode && !cpuControlled) {
 			songScore += score;
+			SONG.validScore = true;
+			if(!note.ratingDisabled)
+			{
+				songHits++;
+				totalPlayed++;
+				RecalculateRating(false);
+			}
+		}
+		else {
+			songScore += score;
+			SONG.validScore = false;
 			if(!note.ratingDisabled)
 			{
 				songHits++;

@@ -62,6 +62,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
+		
+		var option:Option = new Option('More Score Info',
+			"If checked, it will show Sicks, Goods, Bads, etc.",
+			'moreScoreInfo',
+			'bool',
+			false);
+		addOption(option);
 
 		var option:Option = new Option('Ghost Tapping',
 			"If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.",

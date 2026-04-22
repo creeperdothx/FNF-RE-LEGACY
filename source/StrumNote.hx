@@ -37,7 +37,7 @@ class StrumNote extends FlxSprite
 		var skin:String = 'NOTE_assets';
 		if(PlayState.SONG.arrowOpponentSkin != null && PlayState.SONG.arrowOpponentSkin.length > 1 && player != 1) skin = PlayState.SONG.arrowOpponentSkin;
 		if(PlayState.SONG.arrowPlayerSkin != null && PlayState.SONG.arrowPlayerSkin.length > 1 && player == 1) skin = PlayState.SONG.arrowPlayerSkin;
-		texture = skin; //Load texture and anims
+		texture = skin; //Load texture and animssssssssssssssssssssssssssssssssssssssss
 
 		scrollFactor.set();
 	}

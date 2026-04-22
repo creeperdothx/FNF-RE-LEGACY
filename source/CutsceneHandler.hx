@@ -54,7 +54,7 @@ class CutsceneHandler extends FlxBasic
 		}
 
 		cutsceneTime += elapsed;
-		if(endTime <= cutsceneTime)
+		if(endTime <= cutsceneTime || FlxG.keys.justPressed.SPACE)
 		{
 			finishCallback();
 			if(finishCallback2 != null) finishCallback2();
